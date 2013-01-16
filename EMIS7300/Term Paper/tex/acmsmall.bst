@@ -1,10 +1,11 @@
-% "ACM Transactions" BibTeX style, acmtog.bst => created from acmtrans.bst 
+% "ACM Transactions" BibTeX style, acmsmall.bst => created from acmtrans.bst 
 %  for BibTeX version 0.99c, LaTeX version 3.141
 %  Revised 28-MARCH-1996
 %  Revised 30-JUNE-1995
 %  Revised 15-JAN-1996 
-%  Revised 12-NOV-2011 
-%  $Header: /cvs/papers/2007/TOG_GazeDirect/acmtrans.bst,v 1.2 2007/06/28 18:09:40 rjb1 Exp $
+%  Revised 28-JUNE-2010 
+%  Revised 12-DECEMBER-2010 
+%  $Header: acmtrans.bst,v 1.2 96/01/17 09:05:38 boyland Exp $
 %
 % Hacked by John T. Boyland at University of California, Berkeley
 % (with assistance by John R. Hauser)
@@ -121,7 +122,7 @@
 %   - Modified calc.label function to generate proper labels with years in
 %	  case of three and more authors (for et al. cases), when the first author 
 %	  is same. Renamed the old function of calc.label to calc.label.new to
-%	  retain proper writing: (acmtexsupport@aptaracorp.com, dated 12/11/2011)
+%	  retain proper writing: (acmtexsupport@aptaracorp.com, dated 30/12/2010)
 %
 % Original documentation for newapa.sty:
 % =====================================
@@ -584,7 +585,7 @@ FUNCTION {format.btitle}
   { title emphasize }
   { title empty$
     { title emphasize } % jtb: what is this supposed to do ?!?
-    { "{\em " title * "\/}, " * edition * " ed." * } % jtb: no parens for ed.
+    { "{\em " title * "\/} " * edition * " Ed." * } % aptara: no comma and capial case for ed.
     if$
   }
   if$
@@ -595,7 +596,7 @@ FUNCTION {format.emphasize.booktitle}
   { booktitle emphasize }
   { booktitle empty$
     { booktitle emphasize } % jtb: what is this supposed to do ?!?
-    { "{\em " booktitle * "\/}, " * edition * " ed." * } % jtb: no ()s for ed.
+    { "{\em " booktitle * "\/} " * edition * " Ed." * } % aptara: no comma and capial case for ed.
     if$
     }
   if$
@@ -645,7 +646,7 @@ FUNCTION {format.bvolume}
     { "" }
     { series empty$
         { "Vol." volume tie.or.space.connect}
-        { series ", " * "vol." volume tie.or.space.connect *}
+        { series " Series, " * "vol." volume tie.or.space.connect *} % aptara: added "Series" term
       if$
       "volume and number" number either.or.check
     }
@@ -711,6 +712,39 @@ FUNCTION {format.pages}
 % Format journal, volume, number, pages for article types.
 %
 FUNCTION {format.jour.vol}
+{ journal empty$
+    { "no journal in " cite$ * warning$
+      "" }
+    { journal emphasize.space }
+    if$
+  number empty$
+    { volume empty$
+       { "no number and no volume in " cite$ * warning$
+         "" * }
+       { "~{\em " * Volume * "}" * }
+      if$
+    }
+    { volume empty$
+      {"no volume for " cite$ * warning$
+       "~" * number * }
+      { "~" *
+        volume emphasize.comma
+        "~" * number * * }
+      if$
+    }
+  if$
+  pages empty$
+    {"page numbers missing in " cite$ * warning$
+     "" * } % gnp - place a null string on the stack for output
+    { duplicate$ empty$
+      { pop$ format.pages }
+      { ", " *  pages n.dashify * } % gnp - removed pp. for articles
+      if$
+    }
+  if$
+}
+
+FUNCTION {format.jour.vol.mon}
 { journal empty$
     { "no journal in " cite$ * warning$
       "" }
@@ -1006,12 +1040,16 @@ FUNCTION {calc.label}
       if$
     }
   if$
-
   author empty$  % generate the full label citation information.
     { editor empty$
         { organization empty$
-           { "no author, editor, or organization in " cite$ * warning$
-             "??" }
+           { type$ "misc" =
+  	     { "" }
+  	     { "no author, editor, or organization in " cite$ * warning$
+               "??" 
+	     }
+  	     if$
+	     }
            { organization }
            if$
         }
@@ -1054,12 +1092,16 @@ FUNCTION {calc.label.new}
       if$
     }
   if$
-
   author empty$  % generate the full label citation information.
     { editor empty$
         { organization empty$
-           { "no author, editor, or organization in " cite$ * warning$
-             "??" }
+           { type$ "misc" =
+  	     { "" }
+  	     { "no author, editor, or organization in " cite$ * warning$
+               "??" 
+	     }
+  	     if$
+	     }
            { organization }
            if$
         }
@@ -1266,7 +1308,7 @@ FUNCTION {inproceedings}
        { format.in.booktitle format.city "booktitle" output.check
          format.editors.fml output
          new.sentence
-         format.jour.vol output
+         format.jour.vol.mon output
        }
        if$
       }
